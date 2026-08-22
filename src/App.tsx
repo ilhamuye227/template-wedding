@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Music2 } from "lucide-react";
 import Hero from "./components/Hero";
@@ -82,15 +82,13 @@ function LoadingScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
-function MusicToggle() {
-  const [playing, setPlaying] = useState(false);
-
+function MusicToggle({ playing, onToggle }: { playing: boolean; onToggle: () => void }) {
   return (
     <motion.button
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 2.5, type: "spring" }}
-      onClick={() => setPlaying((p) => !p)}
+      onClick={onToggle}
       aria-label={playing ? "Matikan musik" : "Putar musik"}
       aria-pressed={playing}
       style={{
@@ -125,6 +123,27 @@ function MusicToggle() {
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [opened, setOpened] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function playMusic() {
+    audioRef.current?.play().then(() => setPlaying(true)).catch(() => {});
+  }
+
+  function toggleMusic() {
+    if (!audioRef.current) return;
+    if (playing) {
+      audioRef.current.pause();
+      setPlaying(false);
+    } else {
+      playMusic();
+    }
+  }
+
+  function handleOpen() {
+    setOpened(true);
+    playMusic();
+  }
 
   return (
     <>
@@ -140,7 +159,7 @@ export default function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Hero onOpen={() => setOpened(true)} />
+              <Hero onOpen={handleOpen} />
             </motion.div>
           ) : (
             <motion.main
@@ -160,7 +179,14 @@ export default function App() {
         </AnimatePresence>
       )}
 
-      <MusicToggle />
+      <audio
+        ref={audioRef}
+        src="/audio/nanti-kita-seperti-ini.m4a"
+        loop
+        preload="auto"
+      />
+
+      <MusicToggle playing={playing} onToggle={toggleMusic} />
     </>
   );
 }
