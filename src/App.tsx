@@ -11,7 +11,7 @@ import Footer from "./components/Footer";
 
 function LoadingScreen({ onDone }: { onDone: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 2200);
+    const t = setTimeout(onDone, 1200);
     return () => clearTimeout(t);
   }, [onDone]);
 
@@ -144,6 +144,23 @@ export default function App() {
     setOpened(true);
     playMusic();
   }
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    let cleaned = false;
+    const kick = () => {
+      if (cleaned) return;
+      audio.play().then(() => setPlaying(true)).catch(() => {});
+    };
+    const events: (keyof WindowEventMap)[] = ["pointerdown", "touchstart", "keydown"];
+    events.forEach((e) => window.addEventListener(e, kick, { once: true }));
+    kick();
+    return () => {
+      cleaned = true;
+      events.forEach((e) => window.removeEventListener(e, kick));
+    };
+  }, []);
 
   return (
     <>
