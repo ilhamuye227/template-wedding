@@ -181,7 +181,7 @@ export default function App() {
 
       <audio
         ref={audioRef}
-        src="/audio/nanti-kita-seperti-ini.m4a"
+        src={`${import.meta.env.BASE_URL}audio/nanti-kita-seperti-ini.m4a`}
         loop
         preload="auto"
       />
